@@ -506,3 +506,5 @@ Congrats! You got through this guide. Now your certs will automatically renew, y
 
 Now go set up your Yunohost credentials and enjoy!
 
+(PRs welcome btw)
+
