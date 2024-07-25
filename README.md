@@ -145,8 +145,6 @@ We will use the latest (at this time) LTS Ubuntu release for the proxy.
 sudo lxc init ubuntu:24.04 nginx-proxy -s nginx-proxy-pool
 ```
 
-The Nginx proxy doesn't need very much storage, so the default is very much adequate.
-
 We will now choose which internal IP address we will give to Yunohost and the proxy. To do that, we have to first know the range:
 
 ```sh
