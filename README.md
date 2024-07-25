@@ -272,9 +272,7 @@ We will also disable the default site:
 rm /etc/nginx/sites-enabled/default
 ```
 
-Pass the rest of the ports to Yunohost.
-
-Open a config file:
+To pass the rest of the ports to Yunohost open a config file:
 
 ```sh
 nano /etc/nginx/stream-proxy.conf
