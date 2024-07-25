@@ -351,7 +351,7 @@ Since in the config we are including wildcard domains, we are going to have to u
 
 Certbot will also edit some Nginx configs automatically.
 
-Depending on your domain name registrar, the next few steps will differ slightly. Since I have Porkbun as my registrar, I will now install the `certbot-dns-porkbun` plugin for certbot. To find out which package corresponds to your registrar, you can google "certbot <your-registrar> pip". You will also have to figure out how to get API keys from your registrar yourself.
+Depending on your domain name registrar, the next few steps will differ slightly. Since I have Porkbun as my registrar, I will now install the `certbot-dns-porkbun` plugin for certbot. To find out which package corresponds to your registrar, you can google 'certbot [your-registrar] pip'. You will also have to figure out how to get API keys from your registrar yourself.
 
 Consult the Certbot docs to be completely sure of what the next steps are:  
 [Certbot Instructions](https://certbot.eff.org/instructions?ws=nginx&os=ubuntufocal&tab=wildcard)
