@@ -385,7 +385,7 @@ certbot plugins
 If your plugin doesn't show up there:
 
 ```sh
-snap connect certbot:plugin certbot-dns-porkbun
+snap connect certbot:plugin certbot-dns-<registrar>
 
 certbot plugins
 ```
