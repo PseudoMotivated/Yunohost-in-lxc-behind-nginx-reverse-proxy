@@ -502,7 +502,8 @@ Which makes your containers start automatically when you reboot your machine.
 
 Congrats! You got through this guide. Now your certs will automatically renew, your domain will always point to your machine, and you have a working Yunohost container.
 
-Now go set up your Yunohost credentials and enjoy!
+Now go set up your Yunohost credentials, DNS records and Apps.
+Enjoy!
 
 (PRs welcome btw)
 
