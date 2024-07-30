@@ -193,8 +193,28 @@ Choose yes when it asks you to overwrite configurations for various programs. It
 
 Once it is done, it will spit out two IP addresses: one internal, which begins with 10, and another which is your public IP address. You can't access your server via your public IP just yet, but you can connect to your internal IP with a browser on the host.
 
-Now we will get to the good stuff. This is where many headaches were had and probably the part that you are having trouble with.
+Now to avoid the ip of the client appearing as the reverse proxies internal ip, we will include a config for nginx: 
 
+```sh
+nano /etc/nginx/conf.d/real-ip.conf
+```
+
+In there we will have the following:
+```nginx
+real_ip_header    X-Real-IP;
+set_real_ip_from  <nginx-container-ip>;
+```
+Save and exit. 
+
+Test the config:
+```sh
+nginx -t
+```
+If no errors: 
+
+```sh 
+systemctl reload nginx
+```
 Do `exit` to get back to the host shell.
 
 ## Setting Up the Nginx Reverse Proxy
@@ -203,12 +223,12 @@ Let's open up some ports so that we can access what we need to in the proxy cont
 
 ```sh
 sudo lxc config device add nginx-proxy http proxy listen=tcp:0.0.0.0:80 connect=tcp:<nginx-container-ip>:80
-sudo lxc config device add nginx-proxy https proxy listen=tcp:0.0.0.0:443 connect=tcp:<nginx-container-ip>:443
-sudo lxc config device add nginx-proxy imaps proxy listen=tcp:0.0.0.0:993 connect=tcp:<nginx-container-ip>:993
-sudo lxc config device add nginx-proxy smtp proxy listen=tcp:0.0.0.0:25 connect=tcp:<nginx-container-ip>:25
-sudo lxc config device add nginx-proxy submission proxy listen=tcp:0.0.0.0:587 connect=tcp:<nginx-container-ip>:587
-sudo lxc config device add nginx-proxy xmpp_client proxy listen=tcp:0.0.0.0:5222 connect=tcp:<nginx-container-ip>:5222
-sudo lxc config device add nginx-proxy xmpp_server proxy listen=tcp:0.0.0.0:5269 connect=tcp:<nginx-container-ip>:5269
+sudo lxc config device add nginx-proxy https proxy listen=tcp:0.0.0.0:443 connect=tcp:<nginx-container-ip>:443 proxy_protocol=true
+sudo lxc config device add nginx-proxy imaps proxy listen=tcp:0.0.0.0:993 connect=tcp:<nginx-container-ip>:993 proxy_protocol=true
+sudo lxc config device add nginx-proxy smtp proxy listen=tcp:0.0.0.0:25 connect=tcp:<nginx-container-ip>:25 proxy_protocol=true 
+sudo lxc config device add nginx-proxy submission proxy listen=tcp:0.0.0.0:587 connect=tcp:<nginx-container-ip>:587 proxy_protocol=true
+sudo lxc config device add nginx-proxy xmpp_client proxy listen=tcp:0.0.0.0:5222 connect=tcp:<nginx-container-ip>:5222 proxy_protocol=true
+sudo lxc config device add nginx-proxy xmpp_server proxy listen=tcp:0.0.0.0:5269 connect=tcp:<nginx-container-ip>:5269 proxy_protocol=true
 ```
 
 I intentionally excluded port 22, which is for SSH access. I do not recommend that you funnel it to the container.
@@ -233,12 +253,16 @@ Open the config file:
 nano /etc/nginx/sites-available/reverse-proxy.conf
 ```
 
-And edit this config file before you paste it in:
+And edit the following config file before you paste it in.
+The 10.x.x.0/24 should be your lxdbr0 subnet.
 
 ```nginx
 server {
     server_name yourdomain.com *.yourdomain.com;
     listen 80;
+
+    real_ip_header proxy_protocol;
+    set_real_ip_from 10.x.x.0/24;
 
     location / {
         proxy_pass https://<yunohost-container-ip>;
@@ -295,22 +319,27 @@ stream {
     server {
         listen 25;
         proxy_pass <yunohost-container-ip>:25;
+        proxy_protocol on;
     }
     server {
         listen 587;
         proxy_pass <yunohost-container-ip>:587;
+        proxy_protocol on;
     }
     server {
         listen 993;
         proxy_pass <yunohost-container-ip>:993;
+        proxy_protocol on;
     }
     server {
         listen 5222;
         proxy_pass <yunohost-container-ip>:5222;
+        proxy_protocol on;
     }
     server {
         listen 5269;
         proxy_pass <yunohost-container-ip>:5269;
+        proxy_protocol on;
     }
 }
 ```
@@ -436,6 +465,21 @@ ls -l *certbot*
 ```
 If it shows you some processes, that means certbot is running the background.
 
+Now that you have certbot, it has edited your reverse proxy config a little, and there is one more edit we have to make: 
+
+```sh
+nano /etc/nginx/sites-available/reverse-proxy.conf
+```
+
+Edit look for the line that says:
+
+```nginx
+listen 443 ssl; # managed by Certbot
+```
+And edit it to:
+```nginx
+listen 443 ssl proxy_protocol; # managed by Certbot
+```
 ## Installing ddclient
 
 If you know that you have a static public IP address, you can skip this and just set your IP in the DNS records.
