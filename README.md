@@ -471,7 +471,7 @@ Now that you have certbot, it has edited your reverse proxy config a little, and
 nano /etc/nginx/sites-available/reverse-proxy.conf
 ```
 
-Edit look for the line that says:
+Look for the line that says:
 
 ```nginx
 listen 443 ssl; # managed by Certbot
@@ -480,6 +480,13 @@ And edit it to:
 ```nginx
 listen 443 ssl proxy_protocol; # managed by Certbot
 ```
+Test and reload:
+
+```sh
+nginx -t
+systemctl reload nginx
+```
+
 ## Installing ddclient
 
 If you know that you have a static public IP address, you can skip this and just set your IP in the DNS records.
